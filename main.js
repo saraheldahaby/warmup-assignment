@@ -7,7 +7,29 @@ const fs = require("fs");
 // Returns: string formatted as h:mm:ss
 // ============================================================
 function getShiftDuration(startTime, endTime) {
-    // TODO: Implement this function
+
+    function convertToSeconds(timeStr) {
+        timeStr = timeStr.trim();
+        let [time, period] = timeStr.split(" ");
+        let [h, m, s] = time.split(":").map(Number);
+
+        if (period === "pm" && h !== 12) h += 12;
+        if (period === "am" && h === 12) h = 0;
+
+        return h * 3600 + m * 60 + s;
+    }
+
+    let start = convertToSeconds(startTime);
+    let end = convertToSeconds(endTime);
+
+    let diff = end - start;
+
+    let h = Math.floor(diff / 3600);
+    diff %= 3600;
+    let m = Math.floor(diff / 60);
+    let s = diff % 60;
+
+    return h + ":" + String(m).padStart(2,'0') + ":" + String(s).padStart(2,'0');
 }
 
 // ============================================================
@@ -17,7 +39,40 @@ function getShiftDuration(startTime, endTime) {
 // Returns: string formatted as h:mm:ss
 // ============================================================
 function getIdleTime(startTime, endTime) {
-    // TODO: Implement this function
+
+    function convertToSeconds(timeStr) {
+        timeStr = timeStr.trim();
+        let [time, period] = timeStr.split(" ");
+        let [h, m, s] = time.split(":").map(Number);
+
+        if (period === "pm" && h !== 12) h += 12;
+        if (period === "am" && h === 12) h = 0;
+
+        return h * 3600 + m * 60 + s;
+    }
+
+    let start = convertToSeconds(startTime);
+    let end = convertToSeconds(endTime);
+
+    let deliveryStart = 8 * 3600;   // 8:00 AM
+    let deliveryEnd = 22 * 3600;    // 10:00 PM
+
+    let idle = 0;
+
+    if (start < deliveryStart) {
+        idle += Math.min(end, deliveryStart) - start;
+    }
+
+    if (end > deliveryEnd) {
+        idle += end - Math.max(start, deliveryEnd);
+    }
+
+    let h = Math.floor(idle / 3600);
+    idle %= 3600;
+    let m = Math.floor(idle / 60);
+    let s = idle % 60;
+
+    return h + ":" + String(m).padStart(2,'0') + ":" + String(s).padStart(2,'0');
 }
 
 // ============================================================

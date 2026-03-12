@@ -11,22 +11,26 @@ function getShiftDuration(startTime, endTime) {
     function convertToSeconds(timeStr) {
         timeStr = timeStr.trim();
         let [time, period] = timeStr.split(" ");
-        let [h, m, s] = time.split(":").map(Number);
+        let [h,m,s] = time.split(":").map(Number);
 
-        if (period === "pm" && h !== 12) h += 12;
-        if (period === "am" && h === 12) h = 0;
+        if (period.toLowerCase() === "pm" && h !== 12) h += 12;
+        if (period.toLowerCase() === "am" && h === 12) h = 0;
 
-        return h * 3600 + m * 60 + s;
+        return h*3600 + m*60 + s;
     }
 
     let start = convertToSeconds(startTime);
     let end = convertToSeconds(endTime);
 
+    if (end < start) {
+        end += 24 * 3600;
+    }
+
     let diff = end - start;
 
-    let h = Math.floor(diff / 3600);
+    let h = Math.floor(diff/3600);
     diff %= 3600;
-    let m = Math.floor(diff / 60);
+    let m = Math.floor(diff/60);
     let s = diff % 60;
 
     return h + ":" + String(m).padStart(2,'0') + ":" + String(s).padStart(2,'0');

@@ -199,7 +199,24 @@ function addShiftRecord(textFile, shiftObj) {
 // Returns: nothing (void)
 // ============================================================
 function setBonus(textFile, driverID, date, newValue) {
-    // TODO: Implement this function
+
+    const fs = require("fs");
+
+    let data = fs.readFileSync(textFile, "utf8").trim();
+    let lines = data.split("\n");
+
+    for (let i = 0; i < lines.length; i++) {
+
+        let parts = lines[i].split(",");
+
+        if (parts[0] === driverID && parts[2] === date) {
+            parts[9] = newValue.toString();
+            lines[i] = parts.join(",");
+        }
+
+    }
+
+    fs.writeFileSync(textFile, lines.join("\n"));
 }
 
 // ============================================================
@@ -210,7 +227,39 @@ function setBonus(textFile, driverID, date, newValue) {
 // Returns: number (-1 if driverID not found)
 // ============================================================
 function countBonusPerMonth(textFile, driverID, month) {
-    // TODO: Implement this function
+
+    const fs = require("fs");
+
+    let data = fs.readFileSync(textFile, "utf8").trim();
+    let lines = data.split("\n");
+
+    let count = 0;
+    let foundDriver = false;
+
+    for (let line of lines) {
+
+        let parts = line.split(",");
+
+        let id = parts[0];
+        let date = parts[2];
+        let bonus = parts[9];
+
+        if (id === driverID) {
+            foundDriver = true;
+
+            let recordMonth = parseInt(date.split("-")[1]);
+
+            if (recordMonth === parseInt(month) && bonus === "true") {
+                count++;
+            }
+        }
+    }
+
+    if (!foundDriver) {
+        return -1;
+    }
+
+    return count;
 }
 
 // ============================================================
@@ -221,7 +270,44 @@ function countBonusPerMonth(textFile, driverID, month) {
 // Returns: string formatted as hhh:mm:ss
 // ============================================================
 function getTotalActiveHoursPerMonth(textFile, driverID, month) {
-    // TODO: Implement this function
+
+    const fs = require("fs");
+
+    let data = fs.readFileSync(textFile, "utf8").trim();
+    let lines = data.split("\n");
+
+    let totalSeconds = 0;
+
+    function toSeconds(timeStr) {
+        let [h, m, s] = timeStr.split(":").map(Number);
+        return h * 3600 + m * 60 + s;
+    }
+
+    for (let line of lines) {
+
+        let parts = line.split(",");
+
+        let id = parts[0];
+        let date = parts[2];
+        let activeTime = parts[7];
+
+        if (id === driverID) {
+
+            let recordMonth = parseInt(date.split("-")[1]);
+
+            if (recordMonth === parseInt(month)) {
+                totalSeconds += toSeconds(activeTime);
+            }
+
+        }
+    }
+
+    let h = Math.floor(totalSeconds / 3600);
+    totalSeconds %= 3600;
+    let m = Math.floor(totalSeconds / 60);
+    let s = totalSeconds % 60;
+
+    return h + ":" + String(m).padStart(2,'0') + ":" + String(s).padStart(2,'0');
 }
 
 // ============================================================

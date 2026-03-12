@@ -82,7 +82,23 @@ function getIdleTime(startTime, endTime) {
 // Returns: string formatted as h:mm:ss
 // ============================================================
 function getActiveTime(shiftDuration, idleTime) {
-    // TODO: Implement this function
+
+    function toSeconds(timeStr) {
+        let [h, m, s] = timeStr.split(":").map(Number);
+        return h * 3600 + m * 60 + s;
+    }
+
+    let shift = toSeconds(shiftDuration);
+    let idle = toSeconds(idleTime);
+
+    let active = shift - idle;
+
+    let h = Math.floor(active / 3600);
+    active %= 3600;
+    let m = Math.floor(active / 60);
+    let s = active % 60;
+
+    return h + ":" + String(m).padStart(2,'0') + ":" + String(s).padStart(2,'0');
 }
 
 // ============================================================
@@ -92,7 +108,28 @@ function getActiveTime(shiftDuration, idleTime) {
 // Returns: boolean
 // ============================================================
 function metQuota(date, activeTime) {
-    // TODO: Implement this function
+
+    function toSeconds(timeStr) {
+        let [h, m, s] = timeStr.split(":").map(Number);
+        return h * 3600 + m * 60 + s;
+    }
+
+    let active = toSeconds(activeTime);
+
+    let normalQuota = (8 * 3600) + (24 * 60); // 8:24:00
+    let eidQuota = 6 * 3600; // 6:00:00
+
+    let day = new Date(date);
+    let eidStart = new Date("2025-04-10");
+    let eidEnd = new Date("2025-04-30");
+
+    let quota = normalQuota;
+
+    if (day >= eidStart && day <= eidEnd) {
+        quota = eidQuota;
+    }
+
+    return active >= quota;
 }
 
 // ============================================================

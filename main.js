@@ -138,8 +138,56 @@ function metQuota(date, activeTime) {
 // shiftObj: (typeof object) has driverID, driverName, date, startTime, endTime
 // Returns: object with 10 properties or empty object {}
 // ============================================================
+
+
 function addShiftRecord(textFile, shiftObj) {
-    // TODO: Implement this function
+
+    let data = fs.readFileSync(textFile, "utf8").trim();
+    let lines = data.length ? data.split("\n") : [];
+
+    for (let line of lines) {
+        let parts = line.split(",");
+        if (parts[0] === shiftObj.driverID && parts[2] === shiftObj.date) {
+            return {};
+        }
+    }
+
+    let shiftDuration = getShiftDuration(shiftObj.startTime, shiftObj.endTime);
+    let idleTime = getIdleTime(shiftObj.startTime, shiftObj.endTime);
+    let activeTime = getActiveTime(shiftDuration, idleTime);
+    let quotaMet = metQuota(shiftObj.date, activeTime);
+
+    let newRecord = {
+        driverID: shiftObj.driverID,
+        driverName: shiftObj.driverName,
+        date: shiftObj.date,
+        startTime: shiftObj.startTime,
+        endTime: shiftObj.endTime,
+        shiftDuration: shiftDuration,
+        idleTime: idleTime,
+        activeTime: activeTime,
+        metQuota: quotaMet,
+        hasBonus: false
+    };
+
+    let newLine = [
+        newRecord.driverID,
+        newRecord.driverName,
+        newRecord.date,
+        newRecord.startTime,
+        newRecord.endTime,
+        newRecord.shiftDuration,
+        newRecord.idleTime,
+        newRecord.activeTime,
+        newRecord.metQuota,
+        newRecord.hasBonus
+    ].join(",");
+
+    lines.push(newLine);
+
+    fs.writeFileSync(textFile, lines.join("\n"));
+
+    return newRecord;
 }
 
 // ============================================================
